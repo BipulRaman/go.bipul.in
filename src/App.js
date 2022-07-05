@@ -5,14 +5,14 @@ import { GetLinkInfo } from "./service";
 
 const App = () => {
   const linkId = window.location.hash.substring(1);
-  const [displayText, setDisplayText] = useState("Redirecting..");
+  const [displayText, setDisplayText] = useState("Redirecting.. 🚀");
   GetLinkInfo(linkId)
     .then((response) => {
       console.log(response.value[0]);
       window.location = response.value[0].TargetUrl;
     })
     .catch(error => {
-      setDisplayText("Link not found !!")
+      setDisplayText("Destination does not exist! 😕")
     });
 
   return <h1>{displayText}</h1>;
