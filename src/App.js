@@ -12,7 +12,7 @@ const App = () => {
       window.location = response.value[0].TargetUrl;
     })
     .catch(error => {
-      setDisplayText("Destination does not exist! 😕")
+      setDisplayText("Destination does not exist! 😶")
     });
 
   return <h1>{displayText}</h1>;
