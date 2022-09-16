@@ -7,7 +7,6 @@ const App = () => {
   const [displayText, setDisplayText] = useState("Redirecting.. 🚀");
   GetLinkInfo(linkId)
     .then((response) => {
-      console.log(response.value[0]);
       window.location = response.value[0].TargetUrl;
     })
     .catch(error => {
