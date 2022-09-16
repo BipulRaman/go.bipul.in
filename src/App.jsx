@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import "./App.scss";
 import { GetLinkInfo } from "./service";
 
@@ -15,7 +14,9 @@ const App = () => {
       setDisplayText("Destination does not exist! 😶")
     });
 
-  return <h1>{displayText}</h1>;
+  return(
+    <h1>{displayText}</h1>
+  );
 };
 
 export default App;
