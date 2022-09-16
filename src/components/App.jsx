@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styles from "./App.module.scss";
-import { GetLinkInfo } from "./service";
+import { GetLinkInfo } from "../utils/service";
 
 const App = () => {
   const linkId = window.location.hash.substring(1);
