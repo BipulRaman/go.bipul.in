@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./App.scss";
+import styles from "./App.module.scss";
 import { GetLinkInfo } from "./service";
 
 const App = () => {
@@ -14,7 +14,9 @@ const App = () => {
     });
 
   return(
-    <h1>{displayText}</h1>
+    <div>
+      <h1>{displayText}</h1>
+    </div>
   );
 };
 
