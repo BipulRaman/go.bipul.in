@@ -1,48 +1,52 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: "./src/index.jsx",
   output: {
-    path: path.join(__dirname, "/dist"), // the bundle output path
-    filename: "bundle.[hash].js", // the name of the bundle
+    path: path.resolve(__dirname, "dist"),
+    filename: "bundle.js",
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: "src/index.html", // to import index.html file inside index.js
+      template: "./public/index.html",
     }),
-    new CopyWebpackPlugin({
-      patterns: [
-        { from: 'public' }
-      ]
-    })
   ],
   devServer: {
-    port: 8080, // you can change the port
+    port: 8081,
+    hot: true, // Enable hot module replacement
+    host: "0.0.0.0", // Allow access from outside the container
+    static: {
+      directory: path.join(__dirname, "public"),
+    },
+    watchFiles: ["src/**/*"], // Watch for changes in the 'src' directory
+    devMiddleware: {
+      writeToDisk: false, // Serve files from memory
+    },
+    client: {
+      overlay: true, // Show errors and warnings in the browser
+    },
+  },
+  watchOptions: {
+    poll: 1000, // Enable polling with a 1-second interval
+    ignored: /node_modules/, // Ignore changes in 'node_modules'
   },
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/, // .js and .jsx files
-        exclude: /node_modules/, // excluding the node_modules folder
+        test: /\.(js|jsx)$/,
+        exclude: /node_modules/,
         use: {
           loader: "babel-loader",
         },
       },
       {
-        test: /\.(sa|sc|c)ss$/, // styles files
+        test: /\.(css|scss)$/,
         use: ["style-loader", "css-loader", "sass-loader"],
-      },
-      {
-        test: /\.(png|woff|woff2|eot|ttf|svg)$/, // to import images and fonts
-        loader: "url-loader",
-        options: { limit: false },
       },
     ],
   },
   resolve: {
-    modules: [__dirname, "src", "node_modules"],
-    extensions: ["*", ".js", ".jsx", ".tsx", ".ts"],
+    extensions: [".js", ".jsx"],
   },
 };
