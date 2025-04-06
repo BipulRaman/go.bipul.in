@@ -6,8 +6,5 @@ services:
     ports:
       - "8081:8081"
     volumes:
-      - .:/usr/src/go-bipul-app:cached
+      - .:/usr/src/go-bipul-app
     command: yarn dev
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-      - CHOKIDAR_INTERVAL=100

@@ -1,8 +1,5 @@
 FROM node:18
 
-# Set environment variable to enable polling for file changes
-ENV CHOKIDAR_USEPOLLING=true
-
 # Create app directory
 WORKDIR /usr/src/go-bipul-app
 
