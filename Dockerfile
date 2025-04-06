@@ -1,7 +1,7 @@
 FROM node:18
 
 # Create app directory
-WORKDIR /usr/src/go-bipul-app
+WORKDIR /usr/src/go-bipul-in-app
 
 # Install app dependencies
 COPY package.json yarn.lock ./
