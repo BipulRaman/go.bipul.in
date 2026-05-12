@@ -3,8 +3,42 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="referrer" content="no-referrer-when-downgrade" />
+    <!-- Tell intermediaries not to cache this HTML either. -->
+    <meta http-equiv="Cache-Control" content="no-store" />
     <title>Bipul's URL Manager</title>
+
+    <!-- Perf: warm up DNS / TLS / TCP to the CSV origin and the host Google
+         redirects the published CSV to. No data is cached — these only set up
+         the connection. -->
+    <link rel="preconnect" href="https://docs.google.com" crossorigin />
+    <link rel="preconnect" href="https://googleusercontent.com" crossorigin />
+    <link rel="dns-prefetch" href="https://docs.google.com" />
+    <link rel="dns-prefetch" href="https://googleusercontent.com" />
+
+    <link rel="shortcut icon" type="image/x-icon" href="https://cdn.bipul.in/bipul.in/images/favicon.ico" />
+
+    <!-- Perf: kick the fetch off as early as possible (in <head>, before body
+         parsing finishes) and share the in-flight promise with the main script.
+         cache: 'no-store' ensures nothing is written to the HTTP cache. -->
+    <script>
+      (function () {
+        'use strict';
+        var CSV_URL =
+          'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7R5Hk0hMNwXxduL3-_WXc952jaeAvOcd1XpYWETiD1nye-GO86NSQmDh8XdlZoz4SRjuxE0GGQ9uF/pub?output=csv';
+        window.__CSV_URL__ = CSV_URL;
+
+        window.__CSV_PROMISE__ = fetch(CSV_URL, {
+          cache: 'no-store',
+          credentials: 'omit'
+        }).then(function (res) {
+          if (!res.ok) throw new Error('CSV fetch failed: ' + res.status);
+          return res.text();
+        });
+      })();
+    </script>
+
     <style>
       html, body {
         margin: 0;
@@ -33,26 +67,16 @@
         margin: 0;
       }
     </style>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1S6P08JBEH"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() { dataLayer.push(arguments); }
-      gtag('js', new Date());
-      gtag('config', 'G-1S6P08JBEH');
-    </script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <main class="container">
       <h1 id="status">Redirecting.. 🚀</h1>
     </main>
+
     <script>
       (function () {
         'use strict';
-
-        var CSV_URL =
-          'https://docs.google.com/spreadsheets/d/e/2PACX-1vR7R5Hk0hMNwXxduL3-_WXc952jaeAvOcd1XpYWETiD1nye-GO86NSQmDh8XdlZoz4SRjuxE0GGQ9uF/pub?output=csv';
 
         var statusEl = document.getElementById('status');
 
@@ -130,7 +154,7 @@
         }
 
         function getSlug() {
-          return (window.location.hash || '').substring(1).trim();
+          return decodeURIComponent((window.location.hash || '').substring(1)).trim();
         }
 
         function isSafeUrl(url) {
@@ -145,14 +169,9 @@
             return;
           }
 
-          fetch(CSV_URL, { cache: 'no-store' })
-            .then(function (res) {
-              if (!res.ok) throw new Error('CSV fetch failed: ' + res.status);
-              return res.text();
-            })
+          (window.__CSV_PROMISE__ || Promise.reject(new Error('no promise')))
             .then(function (text) {
-              var map = csvToMap(text);
-              var url = map[slug.toLowerCase()];
+              var url = csvToMap(text)[slug.toLowerCase()];
               if (url && isSafeUrl(url)) {
                 window.location.replace(url);
               } else {
@@ -165,7 +184,38 @@
         }
 
         redirect();
-        window.addEventListener('hashchange', redirect);
+
+        // On hash change, refetch (also no-store) so a new slug uses fresh data.
+        window.addEventListener('hashchange', function () {
+          window.__CSV_PROMISE__ = fetch(window.__CSV_URL__, {
+            cache: 'no-store',
+            credentials: 'omit'
+          }).then(function (res) {
+            if (!res.ok) throw new Error('CSV fetch failed: ' + res.status);
+            return res.text();
+          });
+          redirect();
+        });
+
+        // Defer analytics until the page is idle so it can't compete with the
+        // redirect path for bandwidth or main-thread time.
+        function loadAnalytics() {
+          if (window.__GA_LOADED__) return;
+          window.__GA_LOADED__ = true;
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-1S6P08JBEH';
+          document.head.appendChild(s);
+          window.dataLayer = window.dataLayer || [];
+          function gtag() { window.dataLayer.push(arguments); }
+          gtag('js', new Date());
+          gtag('config', 'G-1S6P08JBEH');
+        }
+        if ('requestIdleCallback' in window) {
+          requestIdleCallback(loadAnalytics, { timeout: 3000 });
+        } else {
+          window.addEventListener('load', function () { setTimeout(loadAnalytics, 1500); });
+        }
       })();
     </script>
   </body>
