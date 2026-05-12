@@ -1,43 +1,34 @@
 # Bipul's Web
 
-Redirection website of Bipul Raman
+Plain static redirector for https://go.bipul.in — no build step, no framework.
 
-Link: https://go.bipul.in
+## How it works
+
+- `index.html` loads `app.js` in the browser.
+- The slug is read from the URL hash (e.g. `https://go.bipul.in/#abc`).
+- The app fetches a published Google Sheet CSV with two columns: `Slug,Url`.
+- If the slug is found, the browser is redirected to the matching `Url`.
+
+To add a new redirect, just add a `Slug, Url` row to the sheet — no code changes or redeploy required.
 
 ## Deployment
 
-|repository|branch|deployed to|
+| repository | branch | deployed to |
 |---|---|---|
-|`BipulRaman/go.bipul.in`|`main`|https://go.bipul.in|
+| `BipulRaman/go.bipul.in` | `main` | https://go.bipul.in |
 
-## CI-CD Pipeline Status
+GitHub Actions publishes the repo contents to the `gh-pages` branch on every push to `main`.
 
-|Component|Status|
-|---|---|
-|`Public Web`|[![go.bipul.in](https://github.com/BipulRaman/go.bipul.in/actions/workflows/main.yml/badge.svg)](https://github.com/BipulRaman/go.bipul.in/actions/workflows/main.yml)|
+## Running Locally
 
-## Running Locally with docker
-
-To run the application locally, use the following commands:
+Any static file server works. For example:
 
 ```bash
-docker-compose up --build
+npx serve .
 ```
 
-## Running Locally without docker
-
-To run the application locally, use the following commands:
-
-```bash
-yarn
-yarn dev
-```
+Then open http://localhost:3000/#<slug>
 
 ## License
-All information contained herein is, and remains the property of BIPUL RAMAN. [LICENSE file](./LICENSE) stored in the root of this repo.
 
-Some third party software has been used. Their respective license are summarised below:
-
-|Library|Author|Licence|
-|---|---|---|
-|React|Facebook, Inc. and its affiliates|[MIT License](https://github.com/facebook/react/blob/master/LICENSE)|
+All information contained herein is, and remains the property of BIPUL RAMAN. See the [LICENSE file](./LICENSE).
